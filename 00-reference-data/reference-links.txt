@@ -1,0 +1,8 @@
+
+ubuntu terraform intall links
+https://computingforgeeks.com/how-to-install-terraform-on-ubuntu/
+
+
+
+
+
