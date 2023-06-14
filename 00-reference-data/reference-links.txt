@@ -2,6 +2,14 @@
 ubuntu terraform intall links
 https://computingforgeeks.com/how-to-install-terraform-on-ubuntu/
 
+terraform vpc setup
+https://techsparx.com/software-development/terraform/aws/ec2/simple-deploy.html
+
+
+https://jhooq.com/terraform-split-main-tf/
+
+
+
 
 
 

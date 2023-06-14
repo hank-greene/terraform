@@ -1,0 +1,4 @@
+
+
+running ubuntu
+sudo apt install awscli
