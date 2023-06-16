@@ -8,6 +8,9 @@ https://techsparx.com/software-development/terraform/aws/ec2/simple-deploy.html
 
 https://jhooq.com/terraform-split-main-tf/
 
+spacelift.io/blog/terraform-security-group 
+
+
 
 
 
