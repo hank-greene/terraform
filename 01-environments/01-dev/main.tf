@@ -5,14 +5,14 @@ provider "aws" {
 resource "aws_vpc" "dev-drupal" {
     cidr_block = "10.0.0.0/16"
     tags = {
-      Name  = "${aws_vpc.dev-drupal}-vpc"
+      Name  = "dev-drupal-vpc"
     }
 }
 
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.dev-drupal.id
   tags = {
-    Name = "${aws_vpc.dev-drupal}-IGW"
+    Name = "dev-drupal-IGW"
   }
 }
 
@@ -24,29 +24,34 @@ resource "aws_subnet" "public" {
   }
 }
 
+resource "aws_eip" "gw" {
+  depends_on = [aws_internet_gateway.igw]
+  tags = {
+    Name = "${var.vpc_name}-EIP"
+  }
+}
+
+resource "aws_route_table" "dev-public-route-table" {
+  vpc_id = aws_vpc.dev-drupal.id
+}
+
 resource "aws_subnet" "private" {
   vpc_id = aws_vpc.dev-drupal.id
   cidr_block = var.private_cidr
-  tags {
+  tags = {
     Name = "${var.vpc_name}-net-private"
   }
 }
 
-
 resource "aws_route" "route-public" {
-  route_table_id = aws_vpc.dev-drupal_route_table_id
+  //route_table_id = aws_vpc.dev-drupal_route_table.id
+  route_table_id = aws_route_table.dev-public-route-table.id
   destination_cidr_block = aws_vpc.dev-drupal
   gateway_id = aws_internet_gateway.igw.id
 }
 
 
-resource "aws_eip" "gw" {
-  vpc = true
-  debpends_on = [aws_internet_gateway.igw]
-  tags = {
-    Name = "${var.vpc_name}-EIP"
-  }
-}
+/****
 
 resource "aws_nat_gateway" "gw" {
   subnet_id = aws_subnet.public.ip
@@ -174,3 +179,4 @@ resource "aws_efs_mount_target" "dev_mount_targets" {
   subnet_id = aws_instance.app_server.subnet_id
   security_groups = [aws_security_group.dev_efs_sg.id]
 }
+**/
