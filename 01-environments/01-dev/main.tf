@@ -3,93 +3,66 @@ provider "aws" {
 }
 
 resource "aws_vpc" "dev-drupal" {
-    cidr_block = "10.0.0.0/16"
+    cidr_block = var.vpc_cidr_block
     tags = {
       Name  = "dev-drupal-vpc"
     }
 }
+// spacelift.io/blog/terraform-aws-vpc 
 
-resource "aws_internet_gateway" "igw" {
+resource "aws_subnet" "public_subnets" {
+  count = length(var.public_subnet_cidrs)
   vpc_id = aws_vpc.dev-drupal.id
+  cidr_block = element(var.public_subnet_cidrs, count.index)
+  availability_zone = element(var.azs, count.index)
+
   tags = {
-    Name = "dev-drupal-IGW"
+    Name = "public subnet ${ count.index + 1 }"
   }
 }
 
-resource "aws_subnet" "public" {
+resource "aws_subnet" "private_subnets" {
+  count = length(var.private_subnet_cidrs)
   vpc_id = aws_vpc.dev-drupal.id
-  cidr_block = var.public_cidr
+  cidr_block = element(var.private_subnet_cidrs, count.index)
+  availability_zone = element(var.azs, count.index)
+
   tags = {
-    Name = "${var.vpc_name}-net-public"
+    Name = "private subnet ${ count.index + 1 }"
   }
 }
 
-resource "aws_eip" "gw" {
-  depends_on = [aws_internet_gateway.igw]
+resource "aws_internet_gateway" "gw" {
+  vpc_id = aws_vpc.dev-drupal.id
+
   tags = {
-    Name = "${var.vpc_name}-EIP"
+    Name = "vpc internet gw"
   }
 }
 
-resource "aws_route_table" "dev-public-route-table" {
+resource "aws_route_table" "second_rt" {
   vpc_id = aws_vpc.dev-drupal.id
-}
 
-resource "aws_subnet" "private" {
-  vpc_id = aws_vpc.dev-drupal.id
-  cidr_block = var.private_cidr
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.gw.id
+  }
+
   tags = {
-    Name = "${var.vpc_name}-net-private"
+    Name = "2nd route table"
   }
 }
 
-resource "aws_route" "route-public" {
-  //route_table_id = aws_vpc.dev-drupal_route_table.id
-  route_table_id = aws_route_table.dev-public-route-table.id
-  destination_cidr_block = aws_vpc.dev-drupal
-  gateway_id = aws_internet_gateway.igw.id
+resource "aws_route_table_association" "public_subnet_asso" {
+  count = length(var.public_subnet_cidrs)
+  subnet_id = element(aws_subnet.public_subnets[*].id, count.index)
+  route_table_id = aws_route_table.second_rt.id
 }
-
 
 /****
 
-resource "aws_nat_gateway" "gw" {
-  subnet_id = aws_subnet.public.ip
-  allocation_id = aws_eip.gw.id
-  tags = {
-    Name = "${var.vpc_name}-NAT"
-  }
-}
-
-resource "aws_route_table" "private" {
-  vpc_ip = aws_vpc.main.id
-  route {
-    cidr_block = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.gw.id
-  }
-  tags = {
-    Name = "${var.vpc_name}-rt-private"
-  }
-}
-
-resource "aws_route_table_association" "public" {
-  subnet_id = aws_subnet.public.id
-  route_table_id = aws_vpc.main.main_route_table_id
-}
-
-resource "aws_route_table_association" "private" {
-  subnet_id = aws_subnet.private.id
-  route_table_id = aws_route_table.private.id
-}
-
-
 resource "aws_security_group" "dev-drupal-sg" {
     name = "dev-drupal-sg"
-}
-
-resource "aws_subnet" "dev-subnet" {
-    vpc_id = aws_vpc.dev-drupal.id
-    cidr_block = "10.0.1.0/24"
 }
 
 resource "aws_security_group" "sg_vpc_dev_us_east_1" {
