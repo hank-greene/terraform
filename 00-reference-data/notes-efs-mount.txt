@@ -1,0 +1,573 @@
+
+locate the dev mount ip address, see below following the terraform show command, in this case 10.0.1.118
+
+ssh to the box, ssh i <private key> <ubuntu access name>@<public ip>
+ssh -i ec2-01-key admin@44.211.77.62
+run the following commands
+
+$ history
+    1  sudo apt update
+    2  mkdir Downloads
+    3  cd Downloads/
+    4  ls -l
+    5  sudo apt install git
+    6  git clone https://github.com/aws/efs-utils
+    7  cd efs-utils/
+    8  ./build-deb.sh
+    9  sudo apt install binutils
+   10  ./build-deb.sh
+   11  sudo apt -y install ./build/amazon-efs-utils.deb
+   12  ls -l
+   13  ls -l build
+   14  sudo apt -y install ./build/amazon-efs-utils-1.35.0-1_all.deb 
+   15  cd ../..
+   16  sudo mkdir /mnt/efs
+   18  sudo mount -t nfs -o nfsvers=4.1,rsize=104876,wsize=104876,hard,timeo=600,retrans=2,noresvport 10.0.1.118:/ /mnt/efs
+
+
+
+
+$ terraform show
+# module.dev.aws_efs_file_system.dev_efs:
+resource "aws_efs_file_system" "dev_efs" {
+    arn                             = "arn:aws:elasticfilesystem:us-east-1:639362923438:file-system/fs-0d41fcf1244ebb1d5"
+    creation_token                  = "efs"
+    dns_name                        = "fs-0d41fcf1244ebb1d5.efs.us-east-1.amazonaws.com"
+    encrypted                       = true
+    id                              = "fs-0d41fcf1244ebb1d5"
+    kms_key_id                      = "arn:aws:kms:us-east-1:639362923438:key/4eb35133-48fa-4174-978a-b073243aa1ad"
+    number_of_mount_targets         = 0
+    owner_id                        = "639362923438"
+    performance_mode                = "generalPurpose"
+    provisioned_throughput_in_mibps = 0
+    size_in_bytes                   = [
+        {
+            value             = 6144
+            value_in_ia       = 0
+            value_in_standard = 6144
+        },
+    ]
+    tags                            = {
+        "Name" = "Dev-EFS"
+    }
+    tags_all                        = {
+        "Name" = "Dev-EFS"
+    }
+    throughput_mode                 = "bursting"
+}
+
+# module.dev.aws_efs_mount_target.dev_mount_targets[1]:
+resource "aws_efs_mount_target" "dev_mount_targets" {
+    availability_zone_id   = "use1-az2"
+    availability_zone_name = "us-east-1a"
+    dns_name               = "fs-0d41fcf1244ebb1d5.efs.us-east-1.amazonaws.com"
+    file_system_arn        = "arn:aws:elasticfilesystem:us-east-1:639362923438:file-system/fs-0d41fcf1244ebb1d5"
+    file_system_id         = "fs-0d41fcf1244ebb1d5"
+    id                     = "fsmt-022dbf62ea8223008"
+    ip_address             = "10.0.1.118"
+    mount_target_dns_name  = "us-east-1a.fs-0d41fcf1244ebb1d5.efs.us-east-1.amazonaws.com"
+    network_interface_id   = "eni-0830b3a93bfc2e363"
+    owner_id               = "639362923438"
+    security_groups        = [
+        "sg-0fdd34cffa0ea78fe",
+    ]
+    subnet_id              = "subnet-049789c1400fad6f8"
+}
+
+# module.dev.aws_instance.app_server:
+resource "aws_instance" "app_server" {
+    ami                                  = "ami-0fec2c2e2017f4e7b"
+    arn                                  = "arn:aws:ec2:us-east-1:639362923438:instance/i-04cd6f39c26309fe7"
+    associate_public_ip_address          = true
+    availability_zone                    = "us-east-1a"
+    cpu_core_count                       = 1
+    cpu_threads_per_core                 = 1
+    disable_api_stop                     = false
+    disable_api_termination              = false
+    ebs_optimized                        = false
+    get_password_data                    = false
+    hibernation                          = false
+    id                                   = "i-04cd6f39c26309fe7"
+    instance_initiated_shutdown_behavior = "stop"
+    instance_state                       = "running"
+    instance_type                        = "t2.micro"
+    ipv6_address_count                   = 0
+    ipv6_addresses                       = []
+    key_name                             = "ec2-01-key"
+    monitoring                           = false
+    placement_partition_number           = 0
+    primary_network_interface_id         = "eni-0ac3270393e8d43a0"
+    private_dns                          = "ip-10-0-1-252.ec2.internal"
+    private_ip                           = "10.0.1.252"
+    public_ip                            = "44.211.77.62"
+    secondary_private_ips                = []
+    security_groups                      = []
+    source_dest_check                    = true
+    subnet_id                            = "subnet-049789c1400fad6f8"
+    tags                                 = {
+        "Name" = "Dev-Drupal"
+    }
+    tags_all                             = {
+        "Name" = "Dev-Drupal"
+    }
+    tenancy                              = "default"
+    user_data_replace_on_change          = false
+    vpc_security_group_ids               = [
+        "sg-06af33444bfb11f61",
+    ]
+
+    capacity_reservation_specification {
+        capacity_reservation_preference = "open"
+    }
+
+    cpu_options {
+        core_count       = 1
+        threads_per_core = 1
+    }
+
+    credit_specification {
+        cpu_credits = "standard"
+    }
+
+    enclave_options {
+        enabled = false
+    }
+
+    maintenance_options {
+        auto_recovery = "default"
+    }
+
+    metadata_options {
+        http_endpoint               = "enabled"
+        http_put_response_hop_limit = 1
+        http_tokens                 = "optional"
+        instance_metadata_tags      = "disabled"
+    }
+
+    private_dns_name_options {
+        enable_resource_name_dns_a_record    = false
+        enable_resource_name_dns_aaaa_record = false
+        hostname_type                        = "ip-name"
+    }
+
+    root_block_device {
+        delete_on_termination = true
+        device_name           = "/dev/xvda"
+        encrypted             = false
+        iops                  = 100
+        tags                  = {}
+        throughput            = 0
+        volume_id             = "vol-08651fd7472b9d61a"
+        volume_size           = 8
+        volume_type           = "gp2"
+    }
+}
+
+# module.dev.aws_internet_gateway.gw:
+resource "aws_internet_gateway" "gw" {
+    arn      = "arn:aws:ec2:us-east-1:639362923438:internet-gateway/igw-006b9462bc16b3a03"
+    id       = "igw-006b9462bc16b3a03"
+    owner_id = "639362923438"
+    tags     = {
+        "Name" = "vpc internet gw"
+    }
+    tags_all = {
+        "Name" = "vpc internet gw"
+    }
+    vpc_id   = "vpc-0c0091082b4cc68a0"
+}
+
+# module.dev.aws_key_pair.ec2_01_key:
+resource "aws_key_pair" "ec2_01_key" {
+    arn         = "arn:aws:ec2:us-east-1:639362923438:key-pair/ec2-01-key"
+    fingerprint = "31:d2:86:06:c1:38:6e:37:de:fa:26:30:6a:59:7f:36"
+    id          = "ec2-01-key"
+    key_name    = "ec2-01-key"
+    key_pair_id = "key-0dc8b1873e888ef96"
+    key_type    = "rsa"
+    public_key  = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDuUN3vuSVExNcGriH6uoqDZSdgHKCk5eukoUuFPiu9sZYrsSB4yyBqrMfSlA2MHLUVc7zUecgMEALklPwE+3CiZAr6RalGxBv1LnAEDR7b4KJKWMRmk7RWXEt8JzGzygWZQ29F6oxqSPJ6xQDzjDTduPwWjz1iP3M3Xty3b0rJtX/zPXWzSZjNIMwznlY7x4Z/dBQCBTxBFcVAi0BEl+1btRdDrQJncvPFSNP3cN2eTUWIL3kZ/C8HHqUma3H/9rkwitIVWvwOUxHoOQmsMFcKG3E5ZaOkB2j8UW8dNWRWLvXkYnEIKVt//l9DNBiamE9u5quABIDMZhaVhtCGuhXh u2@u2"
+    tags_all    = {}
+}
+
+# module.dev.aws_route_table.second_rt:
+resource "aws_route_table" "second_rt" {
+    arn              = "arn:aws:ec2:us-east-1:639362923438:route-table/rtb-0db88d43c6f7e65e7"
+    id               = "rtb-0db88d43c6f7e65e7"
+    owner_id         = "639362923438"
+    propagating_vgws = []
+    route            = [
+        {
+            carrier_gateway_id         = ""
+            cidr_block                 = "0.0.0.0/0"
+            core_network_arn           = ""
+            destination_prefix_list_id = ""
+            egress_only_gateway_id     = ""
+            gateway_id                 = "igw-006b9462bc16b3a03"
+            ipv6_cidr_block            = ""
+            local_gateway_id           = ""
+            nat_gateway_id             = ""
+            network_interface_id       = ""
+            transit_gateway_id         = ""
+            vpc_endpoint_id            = ""
+            vpc_peering_connection_id  = ""
+        },
+    ]
+    tags             = {
+        "Name" = "2nd route table"
+    }
+    tags_all         = {
+        "Name" = "2nd route table"
+    }
+    vpc_id           = "vpc-0c0091082b4cc68a0"
+}
+
+# module.dev.aws_route_table_association.public_subnet_asso[0]:
+resource "aws_route_table_association" "public_subnet_asso" {
+    id             = "rtbassoc-051191cf7c6bfe541"
+    route_table_id = "rtb-0db88d43c6f7e65e7"
+    subnet_id      = "subnet-049789c1400fad6f8"
+}
+
+# module.dev.aws_route_table_association.public_subnet_asso[1]:
+resource "aws_route_table_association" "public_subnet_asso" {
+    id             = "rtbassoc-0b3f9e828c77a5bea"
+    route_table_id = "rtb-0db88d43c6f7e65e7"
+    subnet_id      = "subnet-018eab748e0402405"
+}
+
+# module.dev.aws_route_table_association.public_subnet_asso[2]:
+resource "aws_route_table_association" "public_subnet_asso" {
+    id             = "rtbassoc-0ded9e7e0854438f8"
+    route_table_id = "rtb-0db88d43c6f7e65e7"
+    subnet_id      = "subnet-0e9695326e54013e5"
+}
+
+# module.dev.aws_security_group.dev-drupal-sg:
+resource "aws_security_group" "dev-drupal-sg" {
+    arn                    = "arn:aws:ec2:us-east-1:639362923438:security-group/sg-06af33444bfb11f61"
+    description            = "Managed by Terraform"
+    egress                 = [
+        {
+            cidr_blocks      = [
+                "0.0.0.0/0",
+            ]
+            description      = ""
+            from_port        = 0
+            ipv6_cidr_blocks = [
+                "::/0",
+            ]
+            prefix_list_ids  = []
+            protocol         = "-1"
+            security_groups  = []
+            self             = false
+            to_port          = 0
+        },
+    ]
+    id                     = "sg-06af33444bfb11f61"
+    ingress                = [
+        {
+            cidr_blocks      = [
+                "173.166.130.89/32",
+            ]
+            description      = ""
+            from_port        = 22
+            ipv6_cidr_blocks = []
+            prefix_list_ids  = []
+            protocol         = "tcp"
+            security_groups  = []
+            self             = false
+            to_port          = 22
+        },
+    ]
+    name                   = "dev-drupal-sg"
+    owner_id               = "639362923438"
+    revoke_rules_on_delete = false
+    tags                   = {}
+    tags_all               = {}
+    vpc_id                 = "vpc-0c0091082b4cc68a0"
+}
+
+# module.dev.aws_security_group.dev_efs_sg:
+resource "aws_security_group" "dev_efs_sg" {
+    arn                    = "arn:aws:ec2:us-east-1:639362923438:security-group/sg-0fdd34cffa0ea78fe"
+    description            = "Allow inbound traffic"
+    egress                 = [
+        {
+            cidr_blocks      = [
+                "0.0.0.0/0",
+            ]
+            description      = ""
+            from_port        = 0
+            ipv6_cidr_blocks = []
+            prefix_list_ids  = []
+            protocol         = "-1"
+            security_groups  = []
+            self             = false
+            to_port          = 0
+        },
+    ]
+    id                     = "sg-0fdd34cffa0ea78fe"
+    ingress                = [
+        {
+            cidr_blocks      = [
+                "0.0.0.0/0",
+            ]
+            description      = ""
+            from_port        = 2049
+            ipv6_cidr_blocks = []
+            prefix_list_ids  = []
+            protocol         = "tcp"
+            security_groups  = []
+            self             = false
+            to_port          = 2049
+        },
+    ]
+    name                   = "dev-efs-traffic"
+    owner_id               = "639362923438"
+    revoke_rules_on_delete = false
+    tags                   = {
+        "Name"    = "efs-traffic"
+        "Product" = "drupal-efs"
+    }
+    tags_all               = {
+        "Name"    = "efs-traffic"
+        "Product" = "drupal-efs"
+    }
+    vpc_id                 = "vpc-0c0091082b4cc68a0"
+}
+
+# module.dev.aws_security_group.sg_vpc_dev_us_east_1:
+resource "aws_security_group" "sg_vpc_dev_us_east_1" {
+    arn                    = "arn:aws:ec2:us-east-1:639362923438:security-group/sg-07bfacae887236a91"
+    description            = "Managed by Terraform"
+    egress                 = [
+        {
+            cidr_blocks      = [
+                "0.0.0.0/0",
+            ]
+            description      = ""
+            from_port        = 0
+            ipv6_cidr_blocks = []
+            prefix_list_ids  = []
+            protocol         = "-1"
+            security_groups  = []
+            self             = false
+            to_port          = 0
+        },
+    ]
+    id                     = "sg-07bfacae887236a91"
+    ingress                = [
+        {
+            cidr_blocks      = [
+                "0.0.0.0/0",
+            ]
+            description      = ""
+            from_port        = 22
+            ipv6_cidr_blocks = []
+            prefix_list_ids  = []
+            protocol         = "tcp"
+            security_groups  = []
+            self             = false
+            to_port          = 22
+        },
+    ]
+    name                   = "terraform-20230621193551584700000001"
+    name_prefix            = "terraform-"
+    owner_id               = "639362923438"
+    revoke_rules_on_delete = false
+    tags                   = {
+        "Name" = "SG : vpc-dev-us-east-1 "
+    }
+    tags_all               = {
+        "Name" = "SG : vpc-dev-us-east-1 "
+    }
+    vpc_id                 = "vpc-0c0091082b4cc68a0"
+}
+
+# module.dev.aws_subnet.private_subnets[0]:
+resource "aws_subnet" "private_subnets" {
+    arn                                            = "arn:aws:ec2:us-east-1:639362923438:subnet/subnet-03af2caaff4d7406e"
+    assign_ipv6_address_on_creation                = false
+    availability_zone                              = "us-east-1a"
+    availability_zone_id                           = "use1-az2"
+    cidr_block                                     = "10.0.4.0/24"
+    enable_dns64                                   = false
+    enable_lni_at_device_index                     = 0
+    enable_resource_name_dns_a_record_on_launch    = false
+    enable_resource_name_dns_aaaa_record_on_launch = false
+    id                                             = "subnet-03af2caaff4d7406e"
+    ipv6_native                                    = false
+    map_customer_owned_ip_on_launch                = false
+    map_public_ip_on_launch                        = false
+    owner_id                                       = "639362923438"
+    private_dns_hostname_type_on_launch            = "ip-name"
+    tags                                           = {
+        "Name" = "private subnet 1"
+    }
+    tags_all                                       = {
+        "Name" = "private subnet 1"
+    }
+    vpc_id                                         = "vpc-0c0091082b4cc68a0"
+}
+
+# module.dev.aws_subnet.private_subnets[1]:
+resource "aws_subnet" "private_subnets" {
+    arn                                            = "arn:aws:ec2:us-east-1:639362923438:subnet/subnet-0f66dabddc6134d06"
+    assign_ipv6_address_on_creation                = false
+    availability_zone                              = "us-east-1b"
+    availability_zone_id                           = "use1-az4"
+    cidr_block                                     = "10.0.5.0/24"
+    enable_dns64                                   = false
+    enable_lni_at_device_index                     = 0
+    enable_resource_name_dns_a_record_on_launch    = false
+    enable_resource_name_dns_aaaa_record_on_launch = false
+    id                                             = "subnet-0f66dabddc6134d06"
+    ipv6_native                                    = false
+    map_customer_owned_ip_on_launch                = false
+    map_public_ip_on_launch                        = false
+    owner_id                                       = "639362923438"
+    private_dns_hostname_type_on_launch            = "ip-name"
+    tags                                           = {
+        "Name" = "private subnet 2"
+    }
+    tags_all                                       = {
+        "Name" = "private subnet 2"
+    }
+    vpc_id                                         = "vpc-0c0091082b4cc68a0"
+}
+
+# module.dev.aws_subnet.private_subnets[2]:
+resource "aws_subnet" "private_subnets" {
+    arn                                            = "arn:aws:ec2:us-east-1:639362923438:subnet/subnet-0b6f0933e14e234bc"
+    assign_ipv6_address_on_creation                = false
+    availability_zone                              = "us-east-1c"
+    availability_zone_id                           = "use1-az6"
+    cidr_block                                     = "10.0.6.0/24"
+    enable_dns64                                   = false
+    enable_lni_at_device_index                     = 0
+    enable_resource_name_dns_a_record_on_launch    = false
+    enable_resource_name_dns_aaaa_record_on_launch = false
+    id                                             = "subnet-0b6f0933e14e234bc"
+    ipv6_native                                    = false
+    map_customer_owned_ip_on_launch                = false
+    map_public_ip_on_launch                        = false
+    owner_id                                       = "639362923438"
+    private_dns_hostname_type_on_launch            = "ip-name"
+    tags                                           = {
+        "Name" = "private subnet 3"
+    }
+    tags_all                                       = {
+        "Name" = "private subnet 3"
+    }
+    vpc_id                                         = "vpc-0c0091082b4cc68a0"
+}
+
+# module.dev.aws_subnet.public_subnets[0]:
+resource "aws_subnet" "public_subnets" {
+    arn                                            = "arn:aws:ec2:us-east-1:639362923438:subnet/subnet-049789c1400fad6f8"
+    assign_ipv6_address_on_creation                = false
+    availability_zone                              = "us-east-1a"
+    availability_zone_id                           = "use1-az2"
+    cidr_block                                     = "10.0.1.0/24"
+    enable_dns64                                   = false
+    enable_lni_at_device_index                     = 0
+    enable_resource_name_dns_a_record_on_launch    = false
+    enable_resource_name_dns_aaaa_record_on_launch = false
+    id                                             = "subnet-049789c1400fad6f8"
+    ipv6_native                                    = false
+    map_customer_owned_ip_on_launch                = false
+    map_public_ip_on_launch                        = false
+    owner_id                                       = "639362923438"
+    private_dns_hostname_type_on_launch            = "ip-name"
+    tags                                           = {
+        "Name" = "public subnet 1"
+    }
+    tags_all                                       = {
+        "Name" = "public subnet 1"
+    }
+    vpc_id                                         = "vpc-0c0091082b4cc68a0"
+}
+
+# module.dev.aws_subnet.public_subnets[1]:
+resource "aws_subnet" "public_subnets" {
+    arn                                            = "arn:aws:ec2:us-east-1:639362923438:subnet/subnet-018eab748e0402405"
+    assign_ipv6_address_on_creation                = false
+    availability_zone                              = "us-east-1b"
+    availability_zone_id                           = "use1-az4"
+    cidr_block                                     = "10.0.2.0/24"
+    enable_dns64                                   = false
+    enable_lni_at_device_index                     = 0
+    enable_resource_name_dns_a_record_on_launch    = false
+    enable_resource_name_dns_aaaa_record_on_launch = false
+    id                                             = "subnet-018eab748e0402405"
+    ipv6_native                                    = false
+    map_customer_owned_ip_on_launch                = false
+    map_public_ip_on_launch                        = false
+    owner_id                                       = "639362923438"
+    private_dns_hostname_type_on_launch            = "ip-name"
+    tags                                           = {
+        "Name" = "public subnet 2"
+    }
+    tags_all                                       = {
+        "Name" = "public subnet 2"
+    }
+    vpc_id                                         = "vpc-0c0091082b4cc68a0"
+}
+
+# module.dev.aws_subnet.public_subnets[2]:
+resource "aws_subnet" "public_subnets" {
+    arn                                            = "arn:aws:ec2:us-east-1:639362923438:subnet/subnet-0e9695326e54013e5"
+    assign_ipv6_address_on_creation                = false
+    availability_zone                              = "us-east-1c"
+    availability_zone_id                           = "use1-az6"
+    cidr_block                                     = "10.0.3.0/24"
+    enable_dns64                                   = false
+    enable_lni_at_device_index                     = 0
+    enable_resource_name_dns_a_record_on_launch    = false
+    enable_resource_name_dns_aaaa_record_on_launch = false
+    id                                             = "subnet-0e9695326e54013e5"
+    ipv6_native                                    = false
+    map_customer_owned_ip_on_launch                = false
+    map_public_ip_on_launch                        = false
+    owner_id                                       = "639362923438"
+    private_dns_hostname_type_on_launch            = "ip-name"
+    tags                                           = {
+        "Name" = "public subnet 3"
+    }
+    tags_all                                       = {
+        "Name" = "public subnet 3"
+    }
+    vpc_id                                         = "vpc-0c0091082b4cc68a0"
+}
+
+# module.dev.aws_vpc.dev-drupal:
+resource "aws_vpc" "dev-drupal" {
+    arn                                  = "arn:aws:ec2:us-east-1:639362923438:vpc/vpc-0c0091082b4cc68a0"
+    assign_generated_ipv6_cidr_block     = false
+    cidr_block                           = "10.0.0.0/16"
+    default_network_acl_id               = "acl-0ba901f724e41bff5"
+    default_route_table_id               = "rtb-0594aa5ec7f581423"
+    default_security_group_id            = "sg-00f98f8693ae6cfaf"
+    dhcp_options_id                      = "dopt-0f9197787e086e2e0"
+    enable_dns_hostnames                 = false
+    enable_dns_support                   = true
+    enable_network_address_usage_metrics = false
+    id                                   = "vpc-0c0091082b4cc68a0"
+    instance_tenancy                     = "default"
+    ipv6_netmask_length                  = 0
+    main_route_table_id                  = "rtb-0594aa5ec7f581423"
+    owner_id                             = "639362923438"
+    tags                                 = {
+        "Name" = "dev-drupal-vpc"
+    }
+    tags_all                             = {
+        "Name" = "dev-drupal-vpc"
+    }
+}
+u2@u2:~/Dev/02-tf/terraform$ 
+
+
+
+
+
+
