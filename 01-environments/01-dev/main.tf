@@ -134,6 +134,23 @@ resource "aws_instance" "app_server" {
   }
 }
 
+resource "aws_key_pair" "ec2_02_solr_key" {
+  key_name = "ec2-02-solr-key"
+  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDEgdVNH5CfEPCSjUOdUQAUZOTrciG4NNvbXH1xzolWY3TA3vGZFNbaRo66Ugb5MzJ3uhq4MrwWT2Txv7rqIOcEQifi2cYcDw/hfgcgt1pRtv4fVXgrdP8t+ALxirz5IXtLwGl7Z+6aa4ujwHrBtXaQtX/TICCsdT/D4qXZnuFhHe4wsp/eZsaFR+D2dLRzRP6Kkrg3vheDwu0Tdszpbg4+O3ADVoHnFoMXg0JGUyG4r8Ue7Qk+FYYkNndjIK5YVu1Q5cEgeFoyPbJIIsEIdU2DCSUS7U96dpCVeA8pG0mF+OnWxddFBSnzD38un97MExPlAY7Pzmykv6E8yxkCMHNP u2@u2"
+}
+
+resource "aws_instance" "SolrServer" {
+  ami = "ami-0fec2c2e2017f4e7b"
+  instance_type = "t2.micro"
+  key_name = aws_key_pair.ec2_02_solr_key.key_name
+  subnet_id = aws_subnet.public_subnets[0].id
+  vpc_security_group_ids = [aws_security_group.dev-drupal-sg.id]
+  associate_public_ip_address = true
+  tags = {
+    Name = "Dev-Solr"
+  }
+}
+
 resource "aws_efs_file_system" "dev_efs" {
   creation_token = "efs"
   performance_mode = "generalPurpose"
@@ -175,4 +192,68 @@ resource "aws_efs_mount_target" "dev_mount_targets" {
   subnet_id = aws_instance.app_server.subnet_id
   security_groups = [aws_security_group.dev_efs_sg.id]
 }
-/**/
+
+resource "aws_security_group" "dev_rds_sg" {
+  vpc_id = aws_vpc.dev-drupal.id
+  name = "dev_rds_sg"
+  ingress {
+    from_port = 3306
+    to_port   = 3306
+    protocol  = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_db_parameter_group" "dev_db_params" {
+  name = "dev-rds-pg"
+  family = "mysql8.0"
+
+  /******
+  TODO - fix the following error
+  The argument "parameter" was already set at 01-environments/01-dev/main.tf:219,3-12. Each argument may be set only once.
+  parameter = {
+    name = "character_set_server"
+    value = "utf8"
+  }
+  parameter = {
+    name = "character_set_client"
+    value = "utf8"
+  }
+  *****/
+}
+
+resource "aws_db_subnet_group" "dev_db_subnet_group" {
+  name = "dev_db_sg"
+  subnet_ids = [ aws_subnet.private_subnets[0].id, aws_subnet.private_subnets[1].id ]
+  tags = {
+    Name = "dev db private subnet group"
+  }
+}
+
+data "external" "rds" {
+  program = [ "cat", "/home/u2/Dev/02-tf/db-pw/db-pw.json"]
+}
+
+resource "aws_db_instance" "dev_db" {
+  allocated_storage      = 25
+  storage_type           = "gp2"
+  engine                 = "mysql"
+  engine_version         = "8.0"
+  instance_class         = "db.t3.medium"
+  identifier             = "drupal-db"
+  db_name                = "drupal_db"
+  username               = "db_usr"
+  password               = "${data.external.rds.result.password}"
+  parameter_group_name   = aws_db_parameter_group.dev_db_params.id
+  db_subnet_group_name   = aws_db_subnet_group.dev_db_subnet_group.id
+  vpc_security_group_ids = [ aws_security_group.dev_rds_sg.id ]
+  publicly_accessible    = false
+  skip_final_snapshot    = true
+  multi_az               = false 
+}
