@@ -99,7 +99,7 @@ resource "aws_security_group" "sg_vpc_dev_us_east_1" {
       to_port          = 0
     }
   ]
-  ingress                = [
+  ingress = [
     {
       cidr_blocks      = [ "0.0.0.0/0", ]
       description      = ""
@@ -110,10 +110,33 @@ resource "aws_security_group" "sg_vpc_dev_us_east_1" {
       security_groups  = []
       self             = false
       to_port          = 22
+    },
+    {
+      cidr_blocks      = [ "0.0.0.0/0", ]
+      description      = ""
+      from_port        = 80
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      protocol         = "tcp"
+      security_groups  = []
+      self             = false
+      to_port          = 80
+    },
+    {
+      cidr_blocks      = [ "0.0.0.0/0", ]
+      description      = ""
+      from_port        = 443
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      protocol         = "tcp"
+      security_groups  = []
+      self             = false
+      to_port          = 443
     }
   ]
 }
 
+/***** terraform s3 testing
 resource "aws_key_pair" "ec2_01_key" {
   key_name = "ec2-01-key"
   //public_key = "file://home/u2/Dev/02-tf/ec2-01-ssh-key/ec2-01-key.pub"
@@ -185,7 +208,9 @@ resource "aws_security_group" "dev_efs_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+*******/
 
+/****** testing terraform s3
 resource "aws_efs_mount_target" "dev_mount_targets" {
   count = 2
   file_system_id = aws_efs_file_system.dev_efs.id
@@ -209,6 +234,7 @@ resource "aws_security_group" "dev_rds_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+******/
 
 resource "aws_db_parameter_group" "dev_db_params" {
   name = "dev-rds-pg"
@@ -228,6 +254,7 @@ resource "aws_db_parameter_group" "dev_db_params" {
   *****/
 }
 
+/******
 resource "aws_db_subnet_group" "dev_db_subnet_group" {
   name = "dev_db_sg"
   subnet_ids = [ aws_subnet.private_subnets[0].id, aws_subnet.private_subnets[1].id ]
@@ -256,4 +283,107 @@ resource "aws_db_instance" "dev_db" {
   publicly_accessible    = false
   skip_final_snapshot    = true
   multi_az               = false 
+}
+******/
+
+//resource "aws_s3_bucket" "first" {
+//  bucket = "pavneet-1-s3-bucket"
+//}
+
+//resource "aws_s3_bucket_acl" "example1" {
+//  //bucket = aws_s3_bucket.first.id
+//  bucket = "test_s3_bucket"
+//  acl    = "private"
+//}
+
+/*****
+resource "aws_s3_bucket" "prod_media" {
+  //bucket = var.prod_media_bucket
+  bucket = "prod-media-bucket"
+}
+
+resource "aws_s3_bucket_cors_configuration" "prod_media" {
+  bucket = aws_s3_bucket.prod_media.id  
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "HEAD"]
+    allowed_origins = ["*"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
+  }  
+}
+
+resource "aws_s3_bucket_acl" "prod_media" {
+    bucket = aws_s3_bucket.prod_media.id
+    acl    = "public-read"
+    depends_on = [aws_s3_bucket_ownership_controls.s3_bucket_acl_ownership]
+}
+
+resource "aws_s3_bucket_ownership_controls" "s3_bucket_acl_ownership" {
+  bucket = aws_s3_bucket.prod_media.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+  depends_on = [aws_s3_bucket_public_access_block.example]
+}
+
+resource "aws_iam_user" "prod_media_bucket" {
+  name = "prod-media-bucket"
+}
+
+resource "aws_s3_bucket_public_access_block" "example" {
+  bucket = aws_s3_bucket.prod_media.id
+
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+
+resource "aws_s3_bucket_policy" "prod_media_bucket" {
+    bucket = aws_s3_bucket.prod_media.id
+    policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Principal = "*"
+        Action = [
+          "s3:*",
+        ]
+        Effect = "Allow"
+        Resource = [
+          "arn:aws:s3:::${var.prod_media_bucket}",
+          "arn:aws:s3:::${var.prod_media_bucket}/*"
+        ]
+      },
+      {
+        Sid = "PublicReadGetObject"
+        Principal = "*"
+        Action = [
+          "s3:GetObject",
+        ]
+        Effect   = "Allow"
+        Resource = [
+          "arn:aws:s3:::${var.prod_media_bucket}",
+          "arn:aws:s3:::${var.prod_media_bucket}/*"
+        ]
+      },
+    ]
+  })
+  
+  depends_on = [aws_s3_bucket_public_access_block.example]
+}
+*****/
+
+resource "aws_s3_bucket" "onebucket" {
+   bucket = "wtf-testing-s3-with-terraform"
+   acl = "private"
+   versioning {
+      enabled = true
+   }
+   tags = {
+     Name = "Bucket1"
+     Environment = "Test"
+   }
 }
