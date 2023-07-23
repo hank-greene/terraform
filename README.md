@@ -32,3 +32,6 @@ stackoverflow.com/questions/66024950/how-to-organize-modules-for-multiple-enviro
     2. Monolith infrastructure
         Pros:
         Cons:
+
+
+codurance.com/publications/2020/04/28/terraform-with-multiple-environments

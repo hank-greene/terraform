@@ -4,6 +4,12 @@ variable "vpc_id" {
     type = string
 }
 
+variable "aws_internet_gateway" {
+  description = "inet gatway"
+  type = string
+  default = "net set"
+}
+
 /******
 variable "vpc_name" {
     description = "vpc_name"

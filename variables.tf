@@ -1,18 +1,8 @@
 # input 
-
-variable "environment_variables" {
-    type = map(string)
-    default = {
-        dev = "dev"
-        staging = "staging"
-        prod = "prod"
-    }
-}
-
 variable "vpc_name" {
-    description = "the vpc"
+    description = "dev tf vpc"
     type = string
-    default = "the_vpc"
+    default = "dev-tf-vpc"
 }
 
 variable "vpc_azs" {
@@ -30,13 +20,13 @@ variable "vpc_cidr_block" {
 variable "vpc_private_subnets" {
     description = "private subnets"
     type = list(string)
-    default = ["10.0.1.0/24","10.0.2.0/24","10.0.3.0/24"]
+    default = ["10.0.1.0/24","10.0.2.0/24"]
 }
 
 variable "vpc_public_subnets" {
     description = "public subnets"
     type = list(string)
-    default = ["10.0.10.0/24","10.0.20.0/24","10.0.30.0/24"]
+    default = ["10.0.101.0/24","10.0.102.0/24"]
 }
 
 variable "vpc_enable_nat_gateway" {
@@ -53,10 +43,3 @@ variable "vpc_tags" {
         Environment = "dev"
     }
 }
-
-variable "aws_internet_gateway" {
-  description = "inet gatway"
-  type = string
-  default = "net set"
-}
-
