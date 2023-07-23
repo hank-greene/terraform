@@ -1,26 +1,26 @@
-provider "aws" {
-    region = "us-east-1"
-}
-
-resource "aws_vpc" "dev-drupal" {
-    cidr_block = var.vpc_cidr_block
-    tags = {
-      Name  = "dev-drupal-vpc"
-    }
-}
+//resource "aws_vpc" "dev-drupal" {
+    //cidr_block = var.vpc_cidr_block
+    //vpc_id = var.vpc_id
+    //tags = {
+    //  Name  = "dev-drupal-vpc"
+    //}
+//}
 
 // spacelift.io/blog/terraform-aws-vpc 
-resource "aws_subnet" "public_subnets" {
-  count = length(var.public_subnet_cidrs)
-  vpc_id = aws_vpc.dev-drupal.id
-  cidr_block = element(var.public_subnet_cidrs, count.index)
-  availability_zone = element(var.azs, count.index)
+//resource "aws_subnet" "public_subnets" {
+  //count = length(var.vpc_public_subnets)
+  //vpc_id = aws_vpc.dev-drupal.id
+//  vpc_id = var.vpc_id
+  //cidr_block = element(var.public_subnet_cidrs, count.index)
+  //cidr_block = element(var.vpc_public_subnets, count.index)
+  //availability_zone = element(var.azs, count.index)
 
-  tags = {
-    Name = "public subnet ${ count.index + 1 }"
-  }
-}
+  //tags = {
+  //  Name = "public subnet ${ count.index + 1 }"
+  //}
+//}
 
+/***
 resource "aws_subnet" "private_subnets" {
   count = length(var.private_subnet_cidrs)
   vpc_id = aws_vpc.dev-drupal.id
@@ -31,7 +31,8 @@ resource "aws_subnet" "private_subnets" {
     Name = "private subnet ${ count.index + 1 }"
   }
 }
-
+***/
+/***
 resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.dev-drupal.id
 
@@ -39,7 +40,8 @@ resource "aws_internet_gateway" "gw" {
     Name = "vpc internet gw"
   }
 }
-
+****/
+/***
 resource "aws_route_table" "second_rt" {
   vpc_id = aws_vpc.dev-drupal.id
 
@@ -52,14 +54,15 @@ resource "aws_route_table" "second_rt" {
     Name = "2nd route table"
   }
 }
-
+****/
+/****
 resource "aws_route_table_association" "public_subnet_asso" {
   count = length(var.public_subnet_cidrs)
   subnet_id = element(aws_subnet.public_subnets[*].id, count.index)
   route_table_id = aws_route_table.second_rt.id
 }
-
-/****/
+***/
+/**
 resource "aws_security_group" "dev-drupal-sg" {
     name = "dev-drupal-sg"
     vpc_id = aws_vpc.dev-drupal.id
@@ -79,10 +82,12 @@ resource "aws_security_group" "dev-drupal-sg" {
     ipv6_cidr_blocks = ["::/0"]
   }
 }
+***/
 
+/***
 resource "aws_security_group" "sg_vpc_dev_us_east_1" {
-  vpc_id = aws_vpc.dev-drupal.id
-  depends_on = [aws_vpc.dev-drupal]
+  vpc_id = cms.id
+  //depends_on = [aws_vpc.cms]
   tags = {
     Name = "SG : vpc-dev-us-east-1 "
   }
@@ -135,7 +140,7 @@ resource "aws_security_group" "sg_vpc_dev_us_east_1" {
     }
   ]
 }
-
+****/
 /***** terraform s3 testing
 resource "aws_key_pair" "ec2_01_key" {
   key_name = "ec2-01-key"

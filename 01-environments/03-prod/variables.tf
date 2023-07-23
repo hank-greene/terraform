@@ -1,5 +1,10 @@
 // spacelift.io/blog/terraform-aws-vpc 
+variable "vpc_id" {
+    description = "vpc id"
+    type = string
+}
 
+/****
 variable "vpc_name" {
     description = "vpc_name"
     type = string
@@ -27,3 +32,4 @@ variable "azs" {
     description = "availability zones"
     default = ["us-east-1a", "us-east-1b", "us-east-1c"]
 }
+*****/
