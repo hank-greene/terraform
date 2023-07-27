@@ -1,6 +1,60 @@
 # terraform
 deploy the drupal site via terraform
 
+terraform and
+terragrunt  
+env0.com/blog/terragrunt  
+https://terragrunt.gruntwork.io/docs/getting-started/quick-start/
+
+install
+https://github.com/gruntwork-io/terragrunt/releases
+
+
+
+u2@u2:~/Dev/02-tf/terraform$ sudo snap install terragrunt
+terragrunt 0+git.ae675d6 from dt9394 (terraform-snap) installed
+
+
+
+
+
+
+
+u2@u2:~/Dev/02-tf/terraform$ terragrunt
+DESCRIPTION:
+   terragrunt - Terragrunt is a thin wrapper for Terraform that provides extra tools for working with multiple
+   Terraform modules, remote state, and locking. For documentation, see https://github.com/gruntwork-io/terragrunt/.
+
+USAGE:
+   terragrunt <COMMAND>
+
+COMMANDS:
+   plan-all             Display the plans of a 'stack' by running 'terragrunt plan' in each subfolder
+   apply-all            Apply a 'stack' by running 'terragrunt apply' in each subfolder
+   output-all           Display the outputs of a 'stack' by running 'terragrunt output' in each subfolder
+   destroy-all          Destroy a 'stack' by running 'terragrunt destroy' in each subfolder
+   *                    Terragrunt forwards all other commands directly to Terraform
+
+GLOBAL OPTIONS:
+   terragrunt-config                    Path to the Terragrunt config file. Default is terraform.tfvars.
+   terragrunt-tfpath                    Path to the Terraform binary. Default is terraform (on PATH).
+   terragrunt-non-interactive           Assume "yes" for all prompts.
+   terragrunt-working-dir               The path to the Terraform templates. Default is current directory.
+   terragrunt-source                    Download Terraform configurations from the specified source into a temporary folder, and run Terraform in that temporary folder.
+   terragrunt-source-update             Delete the contents of the temporary folder to clear out any old, cached source code before downloading new source code into it.
+   terragrunt-ignore-dependency-errors  *-all commands continue processing components even if a dependency fails.
+
+VERSION:
+   
+
+AUTHOR(S):
+   Gruntwork <www.gruntwork.io>
+   
+
+
+
+
+
 spacelift.io/blog/terraform-output
 
 terraform "design" tradeoffs

@@ -10,6 +10,18 @@ variable "aws_internet_gateway" {
   default = "net set"
 }
 
+variable "public_subnet_cidrs" {
+    type = list(string)
+    description = "public subnet cidr values"
+    default = ["10.0.1.0/24","10.0.2.0/24","10.0.3.0/24"]
+}
+
+variable "private_subnet_cidrs" {
+    type = list(string)
+    description = "private subnet cidr values"
+    default = ["10.1.1.0/24","10.1.2.0/24","10.1.3.0/24"]
+}
+
 /******
 variable "vpc_name" {
     description = "vpc_name"

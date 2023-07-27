@@ -5,3 +5,7 @@ output "vpc_id" {
 output "gw_id" {
     value = aws_internet_gateway.gw.id
 }
+
+output "rt" {
+    value = aws_route_table.rt.id
+}
