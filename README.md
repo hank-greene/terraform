@@ -1,6 +1,6 @@
 # terraform
 
-<img src="https://github.com/hank-greene/terraform/99-reference-data/network-architecture.png?raw=true"/>
+<img src="https://github.com/hank-greene/terraform/blob/main/99-reference-data/network-architecture.png?raw=true"/>
 
 deploy the drupal site via terraform
 
