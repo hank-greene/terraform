@@ -1,9 +1,12 @@
 # terraform
+
+<img src="https://github.com/hank-greene/terraform/99-reference-data/network-architecture.png?raw=true"/>
+
 deploy the drupal site via terraform
 
 terraform and
-terragrunt  
-env0.com/blog/terragrunt  
+terragrunt
+env0.com/blog/terragrunt
 https://terragrunt.gruntwork.io/docs/getting-started/quick-start/
 
 install
@@ -45,11 +48,11 @@ GLOBAL OPTIONS:
    terragrunt-ignore-dependency-errors  *-all commands continue processing components even if a dependency fails.
 
 VERSION:
-   
+
 
 AUTHOR(S):
    Gruntwork <www.gruntwork.io>
-   
+
 
 
 
